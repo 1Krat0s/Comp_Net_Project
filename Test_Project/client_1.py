@@ -4,7 +4,7 @@ import socket
 
 # IP = "192.168.1.101" #"localhost"
 IP = "10.200.102.109"
-PORT = 4450
+PORT = 4500
 ADDR = (IP,PORT)
 SIZE = 1024 ## byte .. buffer size
 FORMAT = "utf-8"
