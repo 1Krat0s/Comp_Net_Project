@@ -11,7 +11,7 @@ from pathlib import Path
 
 from analysis import NetworkAnalyzer
 
-IP = "0.0.0.0"
+IP = "10.200.102.109"
 PORT = 4500
 ADDR = (IP, PORT)
 SIZE = 1024
@@ -582,7 +582,7 @@ def main():
             (legacy_server, ADDR, handle_legacy_client),
         ):
             listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            listener.bind(address)
+            listener.bind(("0.0.0.0", address[1]))
             listener.listen(10)
             selector.register(listener, selectors.EVENT_READ, handler)
 
