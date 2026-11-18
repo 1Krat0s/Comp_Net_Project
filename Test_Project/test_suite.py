@@ -207,8 +207,8 @@ class Raw:
 def login(user="student1", password=None):
     """Log in through client.py's own connect(); returns the text it printed."""
     out = io.StringIO()
-    with mock.patch("builtins.input", return_value=user), \
-            mock.patch.object(client, "getpass", return_value=password or USERS.get(user, "bad")), \
+    secret = password or USERS.get(user, "bad")
+    with mock.patch("builtins.input", lambda prompt="": secret if "Password" in prompt else user), \
             contextlib.redirect_stdout(out):
         client.connect(CFG["host"], CFG["port"])
     return out.getvalue()
@@ -638,13 +638,14 @@ class TestClientCLI(unittest.TestCase):
 
         def fake_input(prompt=""):
             print(prompt)
+            if "Password" in prompt:  # client.py reads the password with input()
+                return USERS["student1"]
             try:
                 return next(it)
             except StopIteration:
                 raise EOFError
 
         with mock.patch("builtins.input", fake_input), \
-                mock.patch.object(client, "getpass", return_value=USERS["student1"]), \
                 contextlib.redirect_stdout(out):
             try:
                 client.main()
@@ -691,7 +692,7 @@ class TestClientCLI(unittest.TestCase):
 
     def test_missing_local_file(self):
         out = self.run_cli(self.connect(), "student1", "upload /no/such/file.txt", "quit")
-        self.assertIn("local file not found", out)
+        self.assertIn("no file found locally", out)
 
     def test_download_of_missing_file_shows_server_error(self):
         out = self.run_cli(self.connect(), "student1", "download ghost_file.txt", "quit")
@@ -710,8 +711,7 @@ class TestClientCLI(unittest.TestCase):
 
     def test_wrong_password_in_cli(self):
         it, out = iter([self.connect(), "student1", "dir", "quit"]), io.StringIO()
-        with mock.patch("builtins.input", lambda p="": next(it)), \
-                mock.patch.object(client, "getpass", return_value="wrong"), \
+        with mock.patch("builtins.input", lambda p="": "wrong" if "Password" in p else next(it)), \
                 contextlib.redirect_stdout(out):
             client.main()
         self.assertIn("Invalid username or password", out.getvalue())
