@@ -1,26 +1,12 @@
-"""
-CNT3004 Final Project - Test suite for server.py, client.py and analysis.py
+# generated test suite
 
-Put this file next to client.py, server.py and analysis.py, then run:
+# use the following to run the tests locally/externally
+# python test_suite.py                    # starts its own temporary server (safe, isolated)
+# python test_suite.py --full-size        # also tests the required 25 MB / 1 GB / 2 GB files
+# python test_suite.py --host 192.168.1.5 # test an already running server on another computer
+# python test_suite.py TestDelete         # run only one group (any unittest argument works)
 
-    python test_suite.py                    # starts its own temporary server (safe, isolated)
-    python test_suite.py --full-size        # also tests the required 25 MB / 1 GB / 2 GB files
-    python test_suite.py --host 192.168.1.5 # test an already running server on another computer
-    python test_suite.py TestDelete         # run only one group (any unittest argument works)
-
-Local mode copies server.py into a temp folder (on ports 14450/14500), so your real
-server_data and network_stats.csv are never touched. With --host the tests that need
-access to the server's files (analysis CSV) are skipped.
-
-PyCharm / no command line: set environment variables instead of flags:
-    CNT_HOST=192.168.1.5 CNT_PORT=4450   (test an already running server)
-    CNT_FULL_SIZE=1                      (also test the 25 MB / 1 GB / 2 GB files)
-
-Groups: Authentication, Upload, Download, Delete, DirAndSubfolders, Security,
-Concurrency, Analysis, ClientCLI, BonusResume.
-"""
 import argparse
-import builtins
 import contextlib
 import csv
 import hashlib
@@ -48,7 +34,7 @@ import client  # noqa: E402
 MB = 1_000_000
 USERS = {"student1": "NetPass2026", "student2": "CloudFileShare!", "admin": "AdminPass123!"}
 CFG = {"host": "127.0.0.1", "port": 14450, "external": False, "full": False}
-if os.environ.get("CNT_HOST"):            # e.g. CNT_HOST=192.168.1.5  CNT_PORT=4450
+if os.environ.get("CNT_HOST"):  # e.g. CNT_HOST=192.168.1.5  CNT_PORT=4450
     CFG.update(host=os.environ["CNT_HOST"], external=True, port=int(os.environ.get("CNT_PORT", 4450)))
 if os.environ.get("CNT_FULL_SIZE") == "1":
     CFG["full"] = True
@@ -95,7 +81,8 @@ def setUpModule():
         if not crashed:
             PROC.terminate()
         LOG.close()
-        details = ("\n--- temporary server " + ("CRASHED" if crashed else "is running but not listening on the expected port")
+        details = ("\n--- temporary server " + (
+            "CRASHED" if crashed else "is running but not listening on the expected port")
                    + " ---\n" + (SERVER_DIR / "server.log").read_text(encoding="utf-8", errors="replace")
                    + "\n(server.py was patched to use JSON_PORT=" + str(CFG["port"]) + ")")
     raise RuntimeError(f"Server not reachable at {CFG['host']}:{CFG['port']}{details}")
@@ -509,7 +496,8 @@ class TestSecurity(ServerTestCase):
 
     def test_filenames_must_not_contain_paths(self):
         for bad in ("../x.txt", "a/b.txt", "..\\x.txt", ".."):
-            up = self.r.cmd({"command": "UPLOAD", "filename": bad, "subfolder": self.sub, "size": 1, "overwrite": False})
+            up = self.r.cmd(
+                {"command": "UPLOAD", "filename": bad, "subfolder": self.sub, "size": 1, "overwrite": False})
             dl = self.r.cmd({"command": "DOWNLOAD", "filename": bad, "subfolder": self.sub})
             de = self.r.cmd({"command": "DELETE", "filename": bad, "subfolder": self.sub})
             for res in (up, dl, de):
@@ -684,10 +672,10 @@ class TestClientCLI(unittest.TestCase):
         self.assertIn("Welcome, student1", out)
         self.assertIn(f"Created directory '{sub}'", out)
         self.assertIn("Uploaded", out)
-        self.assertIn("2.00 MB", out)            # dir listing shows the size
+        self.assertIn("2.00 MB", out)  # dir listing shows the size
         self.assertIn("SHA-256 verified", out)
         self.assertIn("Deleted", out)
-        self.assertIn("(empty)", out)            # dir after delete
+        self.assertIn("(empty)", out)  # dir after delete
         self.assertIn(f"Deleted directory '{sub}'", out)
         self.assertIn("Logged out", out)
         self.assertEqual(file_sha(WORK / "downloads" / name), file_sha(src))
@@ -752,6 +740,7 @@ class TestBonusResume(unittest.TestCase):
 
     def interrupt_download(self):
         """Start a download and drop the connection once CUT bytes have arrived."""
+
         def cutter(done, total, start, base=0):
             if done >= self.CUT:
                 client.sock.close()
