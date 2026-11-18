@@ -100,8 +100,15 @@ class NetworkAnalyzer:
         bytes_transferred = int(bytes_transferred)
         duration_seconds = float(duration_seconds)
 
-        if bytes_transferred < 0 or duration_seconds < 0:
-            raise ValueError("Transfer values cannot be negative")
+        
+        if bytes_transferred < 0:
+            raise ValueError("File size cannot be negative")
+
+        if not math.isfinite(duration_seconds):
+            raise ValueError("Transfer duration must be finite")
+
+        if duration_seconds <= 0:
+            raise ValueError("Transfer duration must be positive")
 
         # Convert bytes to decimal MB
         file_size_mb = bytes_transferred / 1_000_000
@@ -154,8 +161,8 @@ class NetworkAnalyzer:
 
         duration_seconds = float(duration_seconds)
 
-        if duration_seconds < 0:
-            raise ValueError("Response time cannot be negative")
+        if not math.isfinite(duration_seconds) or duration_seconds < 0:
+            raise ValueError("Invalid response duration")
 
         # Convert seconds to milliseconds
         response_time_ms = duration_seconds * 1000
