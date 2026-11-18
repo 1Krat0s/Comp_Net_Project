@@ -6,7 +6,7 @@ import time
 
 import analysis
 
-DEFAULT_PORT = 4450
+DEFAULT_PORT = 4500
 PASSWORD_SALT = "CNT3004_FL26_SECURE_SALT"
 CHUNK = 64 * 1024
 
